@@ -1,0 +1,14 @@
+{
+  "name": "grapheditor",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.7.5"
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "sourceMap": true,
+        "module": "AMD",
+        "target": "ES5",
+        "outFile": "build/grapheditor.js",
+        "rootDir": "src"
+    }
+}

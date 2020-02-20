@@ -1,0 +1,24 @@
+.grapheditor {
+    background-color: #eeeeee;
+}
+
+.grapheditor table {
+    width: 100%;
+    height: 100%;
+}
+
+.grapheditor td {
+    vertical-align: top;
+    overflow: auto;
+}
+
+.grapheditor td div {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.grapheditor td.panel {
+    background-color: #dddddd;
+    min-height: 100%;
+}
