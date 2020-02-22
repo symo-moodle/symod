@@ -33,6 +33,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install typescript
+        run: |
+          npm install -g typescript
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
