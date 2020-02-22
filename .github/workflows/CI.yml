@@ -39,7 +39,7 @@ jobs:
           node-version: 12
       - name: Install typescript
         run: |
-          npm install -g typescript
+          npm install
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
