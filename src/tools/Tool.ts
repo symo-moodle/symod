@@ -1,20 +1,21 @@
-import { GraphEditor } from "../GraphEditor";
+import { GraphEditor } from '../GraphEditor';
 
 export abstract class Tool {
-    protected readonly graphEditor: GraphEditor;
+	protected readonly graphEditor: GraphEditor;
 
-    public constructor(graphEditor: GraphEditor) {
-        this.graphEditor = graphEditor;
-    }
+	public constructor(graphEditor: GraphEditor) {
+		this.graphEditor = graphEditor;
+	}
 
-    public onLeftDown(x: number, y: number): void {}
-    public onLeftUp(x: number, y: number): void {}
-    public onRightDown(x: number, y: number): void {}
-    public onRightUp(x: number, y: number): void {}
-    public onMouseMove(x: number, y: number): void {}
-    public onMouseEnter(x: number, y: number): void {}
-    public onMouseLeave(x: number, y: number): void {}
-    public onDoubleClick(x: number, y: number): void {}
-    public onRightClick(x: number, y: number): void {}
+	/* eslint-disable @typescript-eslint/no-empty-function */
+	public onLeftDown(_x: number, _y: number): void {}
+	public onLeftUp(_x: number, _y: number): void {}
+	public onRightDown(_x: number, _y: number): void {}
+	public onRightUp(_x: number, _y: number): void {}
+	public onMouseMove(_x: number, _y: number): void {}
+	public onMouseEnter(_x: number, _y: number): void {}
+	public onMouseLeave(_x: number, _y: number): void {}
+	public onDoubleClick(_x: number, _y: number): void {}
+	public onRightClick(_x: number, _y: number): void {}
+	/* eslint-enable @typescript-eslint/no-empty-function */
 }
-

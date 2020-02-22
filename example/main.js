@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '',
     paths: {
-        'GraphEditor':'./../build/GraphEditor'
+        'GraphEditor':'./../build/grapheditor'
     }
 });
 
@@ -15,10 +15,10 @@ requirejs(['GraphEditor'], function(GraphEditor) {
     });
     editor.domManager.injectDOM('content');
 
-    const node = new GraphEditor.Node(editor.canvasManager.rootStage, 30, 40, {radius: 15});
-    const cp = new GraphEditor.ControlBox(node);
-    node.validateControlBoxSizing = function(width, height) { return {width: Math.max(100, width), height: Math.max(50, height)}; }
+    const node = new GraphEditor.Node(editor.canvasManager.rootStage, {
+        radius: 15,
+        boundingBox: { x: 30, y: 40, width: 100, height: 50 }
+    });
 
     editor.canvasManager.rootStage.addElement(node);
-    editor.canvasManager.rootStage.addElement(cp);
 });
