@@ -11,14 +11,14 @@ export abstract class Element {
 	public static readonly SELECTED_FILLSTYLE: string = '#0000FF';
 	public static readonly SELECTED_STROKESTYLE: string = '#0000FF';
 
-	private _parent: Stage | null;
+	private readonly mParent: Stage | null;
 
 	public constructor(parent: Stage | null) {
-		this._parent = parent;
+		this.mParent = parent;
 	}
 
 	public get parent(): Stage | null {
-		return this._parent;
+		return this.mParent;
 	}
 
 	public invalidate(): void {

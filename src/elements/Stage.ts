@@ -2,23 +2,23 @@ import { Element } from './Element';
 import { GraphEditor } from '../GraphEditor';
 
 export class Stage extends Element {
-	private width: number;
-	private height: number;
+	private mWidth: number;
+	private mHeight: number;
 
-	private _owner: Element | GraphEditor;
-	private _elements: Element[];
+	private readonly mOwner: Element | GraphEditor;
+	private readonly mElements: Element[];
 
 	public constructor(parent: Element | GraphEditor, options?: { width: number; height: number }) {
 		super(parent instanceof Element ? parent.parent : null);
-		this.width = options?.width || 0;
-		this.height = options?.height || 0;
-		this._owner = parent;
-		this._elements = [];
+		this.mWidth = options?.width ?? 0;
+		this.mHeight = options?.height ?? 0;
+		this.mOwner = parent;
+		this.mElements = [];
 	}
 
 	public resize(width: number, height: number): void {
-		this.width = width;
-		this.height = height;
+		this.mWidth = width;
+		this.mHeight = height;
 		this.invalidate();
 	}
 
@@ -26,34 +26,34 @@ export class Stage extends Element {
 		c.fillStyle = '#fefefe';
 		c.strokeStyle = 'black solid';
 		c.lineWidth = 1;
-		c.fillRect(0, 0, this.width, this.height);
-		c.strokeRect(0, 0, this.width, this.height);
+		c.fillRect(0, 0, this.mWidth, this.mHeight);
+		c.strokeRect(0, 0, this.mWidth, this.mHeight);
 
-		for (const element of this._elements) {
+		for(const element of this.mElements) {
 			element.draw(c);
 		}
 	}
 
 	public invalidate(): void {
-		if (this._owner instanceof Element) super.invalidate();
-		else this._owner.canvasManager.invalidate();
+		if(this.mOwner instanceof Element) super.invalidate();
+		else this.mOwner.canvasManager.invalidate();
 	}
 
 	public get canvas(): GraphEditor {
-		if (this._owner instanceof GraphEditor) return this._owner;
+		if(this.mOwner instanceof GraphEditor) return this.mOwner;
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		else return this._owner.parent!.canvas;
+		else return this.mOwner.parent!.canvas;
 	}
 
 	public addElement(element: Element): void {
-		this._elements.push(element);
+		this.mElements.push(element);
 		this.invalidate();
 	}
 
 	public getElementUnderPosition(x: number, y: number): Element | null {
-		for (const element of this._elements) {
+		for(const element of [...this.mElements].reverse()) {
 			const el = element.getElementUnderPosition(x, y);
-			if (el != null) {
+			if(el !== null) {
 				return el;
 			}
 		}
@@ -61,6 +61,6 @@ export class Stage extends Element {
 	}
 
 	public get boundingBox(): { x: number; y: number; width: number; height: number } {
-		return { x: 0, y: 0, width: this.width, height: this.height };
+		return { x: 0, y: 0, width: this.mWidth, height: this.mHeight };
 	}
 }

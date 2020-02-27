@@ -5,31 +5,34 @@ import { Stage } from '../elements/Stage';
 export interface ICanvasManagerOptions {}
 
 export class CanvasManager {
-	private graphEditor: GraphEditor;
+	private readonly mGraphEditor: GraphEditor;
 
-	private width: number;
-	private height: number;
+	private mWidth: number;
+	private mHeight: number;
 
-	private _rootStage: Stage;
-	private animationFrameHandle: number | undefined;
-	private redrawNeeded = true;
+	private readonly mRootStage: Stage;
+	private mAnimationFrameHandle: number | null;
+	private mRedrawNeeded: boolean;
 
 	public constructor(graphEditor: GraphEditor, _options?: ICanvasManagerOptions) {
-		this.graphEditor = graphEditor;
+		this.mGraphEditor = graphEditor;
 
-		this.width = this.height = 0;
-		this._rootStage = new Stage(this.graphEditor);
+		this.mWidth = 0;
+		this.mHeight = 0;
+		this.mRootStage = new Stage(this.mGraphEditor);
+		this.mAnimationFrameHandle = null;
+		this.mRedrawNeeded = true;
 	}
 
 	public resize(width: number, height: number): void {
-		this.width = width;
-		this.height = height;
-		this._rootStage.resize(this.width, this.height);
+		this.mWidth = width;
+		this.mHeight = height;
+		this.mRootStage.resize(this.mWidth, this.mHeight);
 		this.invalidate();
 	}
 
 	public invalidate(): void {
-		this.redrawNeeded = true;
+		this.mRedrawNeeded = true;
 	}
 
 	public startCanvas(): void {
@@ -37,29 +40,29 @@ export class CanvasManager {
 	}
 
 	public destroyCanvas(): void {
-		if (this.animationFrameHandle) window.cancelAnimationFrame(this.animationFrameHandle);
+		if(this.mAnimationFrameHandle !== null) window.cancelAnimationFrame(this.mAnimationFrameHandle);
 	}
 
 	public get rootStage(): Stage {
-		return this._rootStage;
+		return this.mRootStage;
 	}
 
 	private draw(): void {
-		if (this.redrawNeeded) {
-			const c = this.graphEditor.domManager.canvasContext;
-			const zoom = this.graphEditor.zoomManager.zoom;
+		if(this.mRedrawNeeded) {
+			const c = this.mGraphEditor.domManager.canvasContext;
+			const { zoom } = this.mGraphEditor.zoomManager;
 
-			c.clearRect(0, 0, this.width, this.height);
+			c.clearRect(0, 0, this.mWidth, this.mHeight);
 			c.save();
 			c.scale(zoom, zoom);
-			this._rootStage.draw(c);
+			this.mRootStage.draw(c);
 			c.restore();
-			this.redrawNeeded = false;
+			this.mRedrawNeeded = false;
 		}
 	}
 
 	private scheduleRedraw(): void {
 		this.draw();
-		this.animationFrameHandle = window.requestAnimationFrame(this.scheduleRedraw.bind(this));
+		this.mAnimationFrameHandle = window.requestAnimationFrame(this.scheduleRedraw.bind(this));
 	}
 }

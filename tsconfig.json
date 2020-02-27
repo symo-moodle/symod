@@ -8,9 +8,14 @@
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
         "sourceMap": true,
-        "module": "AMD",
+        "declaration": true,
+        "declarationDir": "./dist",
+        "module": "ES2015",
         "target": "ES5",
-        "outFile": "build/grapheditor.js",
-        "rootDir": "src"
-    }
+        "outDir": "./dist"
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": ["node_modules"]
 }

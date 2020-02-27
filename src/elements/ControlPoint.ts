@@ -1,4 +1,4 @@
-import { Element, BoundingBox } from './Element';
+import { BoundingBox, Element } from './Element';
 import { Cursor } from '../utils/Cursor';
 import { IMovable } from '../tools/Selector';
 
@@ -22,39 +22,42 @@ export interface IControlPointHost {
 }
 
 export class ControlPoint extends Element implements IMovable {
-	public static readonly CONTROLPOINT_RADIUS: number = 6;
+	// eslint-disable-next-line no-magic-numbers
+	public static readonly CONTROLPOINT_RADIUS: number = 4;
 
-	private _x: number;
-	private _y: number;
-	private radius: number;
+	private mX: number;
+	private mY: number;
+	private readonly mRadius: number;
 
-	private host: IControlPointHost;
-	private _cursor: ControlPointCursor;
+	private readonly mHost: IControlPointHost;
+	private readonly mCursor: ControlPointCursor;
 
-	private isMoving: boolean;
-	private movingX: number;
-	private movingY: number;
+	private mIsMoving: boolean;
+	private mMovingX: number;
+	private mMovingY: number;
 
 	public constructor(
 		host: IControlPointHost & Element,
 		x: number,
 		y: number,
-		options?: { radius?: number; cursor?: ControlPointCursor },
+		options?: { radius?: number; cursor?: ControlPointCursor }
 	) {
 		super(host.parent);
-		this.host = host;
+		this.mHost = host;
 
-		this._x = this.movingX = x;
-		this._y = this.movingY = y;
-		this.radius = options?.radius || ControlPoint.CONTROLPOINT_RADIUS;
+		this.mX = x;
+		this.mY = y;
+		this.mMovingX = x;
+		this.mMovingY = y;
+		this.mRadius = options?.radius ?? ControlPoint.CONTROLPOINT_RADIUS;
 
-		this._cursor = options?.cursor || ControlPointCursor.MOVE;
+		this.mCursor = options?.cursor ?? ControlPointCursor.MOVE;
 
-		this.isMoving = false;
+		this.mIsMoving = false;
 	}
 
 	public get cursor(): Cursor {
-		switch (this._cursor) {
+		switch(this.mCursor) {
 			case ControlPointCursor.TOP_LEFT:
 				return Cursor.NW_RESIZE;
 			case ControlPointCursor.TOP:
@@ -73,62 +76,74 @@ export class ControlPoint extends Element implements IMovable {
 				return Cursor.S_RESIZE;
 			case ControlPointCursor.BOTTOM_RIGHT:
 				return Cursor.SE_RESIZE;
+			default:
+				throw new Error('No such cursor');
 		}
 	}
 
 	public get x(): number {
-		return this.isMoving ? this.movingX : this._x;
+		return this.mIsMoving ? this.mMovingX : this.mX;
 	}
 
 	public get y(): number {
-		return this.isMoving ? this.movingY : this._y;
+		return this.mIsMoving ? this.mMovingY : this.mY;
 	}
 
 	public startMove(x: number, y: number): void {
-		this.isMoving = true;
-		this.movingX = x;
-		this.movingY = y;
-		this.host.controlPointStartedMove(this);
+		this.mIsMoving = true;
+		this.mMovingX = x;
+		this.mMovingY = y;
+		this.mHost.controlPointStartedMove(this);
 		this.invalidate();
 	}
 
 	public moveTo(x: number, y: number): void {
-		this.movingX = x;
-		this.movingY = y;
-		this.host.controlPointMovedTo(this);
+		this.mMovingX = x;
+		this.mMovingY = y;
+		this.mHost.controlPointMovedTo(this);
 		this.invalidate();
 	}
 
 	public finishMove(x: number, y: number): void {
-		this.isMoving = false;
-		this._x = x;
-		this._y = y;
-		this.host.controlPointFinishedMove(this);
+		this.mIsMoving = false;
+		this.mX = x;
+		this.mY = y;
+		this.mHost.controlPointFinishedMove(this);
 		this.invalidate();
 	}
 
 	public cancelMove(): void {
-		this.isMoving = false;
-		this.host.controlPointCanceledMove(this);
+		this.mIsMoving = false;
+		this.mHost.controlPointCanceledMove(this);
 		this.invalidate();
+	}
+
+	public validateMoveTo(x: number, y: number): { x: number; y: number } {
+		return { x, y };
 	}
 
 	public draw(c: CanvasRenderingContext2D): void {
 		c.strokeStyle = Element.SELECTED_STROKESTYLE;
 		c.fillStyle = Element.SELECTED_FILLSTYLE;
 		c.beginPath();
-		c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+		c.arc(this.x, this.y, this.mRadius, 0, Math.PI * 2);
 		c.fill();
 		c.stroke();
 	}
 
 	public get boundingBox(): BoundingBox {
-		return { x: this.x - this.radius, y: this.y - this.radius, width: 2 * this.radius, height: 2 * this.radius };
+		return {
+			x: this.x - this.mRadius,
+			y: this.y - this.mRadius,
+			width: 2 * this.mRadius,
+			height: 2 * this.mRadius
+		};
 	}
 
 	public getElementUnderPosition(x: number, y: number): Element | null {
-		if (Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2) <= Math.pow(this.radius, 2)) {
+		if(((this.x - x) ** 2) + ((this.y - y) ** 2) <= this.mRadius ** 2) {
 			return this;
-		} else return null;
+		}
+		else return null;
 	}
 }

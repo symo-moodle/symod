@@ -1,12 +1,11 @@
-export * from './elements/ControlPoint';
-export * from './elements/ControlBox';
-export * from './elements/Node';
+export * from './elements/BasicShapes';
+export * from './elements/Label';
 
-import { DOMManager, IDOMManagerOptions } from './managers/DOMManager';
 import { CanvasManager, ICanvasManagerOptions } from './managers/CanvasManager';
-import { ToolManager, IToolManagerOptions } from './managers/ToolManager';
-import { SelectionManager, ISelectionManagerOptions } from './managers/SelectionManager';
-import { ZoomManager, IZoomManagerOptions } from './managers/ZoomManager';
+import { DOMManager, IDOMManagerOptions } from './managers/DOMManager';
+import { ISelectionManagerOptions, SelectionManager } from './managers/SelectionManager';
+import { IToolManagerOptions, ToolManager } from './managers/ToolManager';
+import { IZoomManagerOptions, ZoomManager } from './managers/ZoomManager';
 
 type GraphEditorOptions = IDOMManagerOptions &
 	ICanvasManagerOptions &
@@ -15,50 +14,54 @@ type GraphEditorOptions = IDOMManagerOptions &
 	IZoomManagerOptions;
 
 export class GraphEditor {
-	private _domManager: DOMManager;
-	private _canvasManager: CanvasManager;
-	private _toolManager: ToolManager;
-	private _selectionManager: SelectionManager;
-	private _zoomManager: ZoomManager;
+	/* eslint-disable no-magic-numbers */
+	private static readonly DEFAULT_WIDTH = 600;
+	private static readonly DEFAULT_HEIGHT = 400;
+	private static readonly DEFAULT_PANEL_WIDTH = 250;
+	/* eslint-enable no-magic-numbers */
+
+	private readonly mDomManager: DOMManager;
+	private readonly mCanvasManager: CanvasManager;
+	private readonly mToolManager: ToolManager;
+	private readonly mSelectionManager: SelectionManager;
+	private readonly mZoomManager: ZoomManager;
 
 	public constructor(id: string, options?: GraphEditorOptions) {
-		this._domManager = new DOMManager(this, {
+		this.mDomManager = new DOMManager(this, {
 			id: id,
-			width: options?.width || 600,
-			height: options?.height || 400,
-			panelWidth: options?.panelWidth || 250,
+			width: options?.width ?? GraphEditor.DEFAULT_WIDTH,
+			height: options?.height ?? GraphEditor.DEFAULT_HEIGHT,
+			panelWidth: options?.panelWidth ?? GraphEditor.DEFAULT_PANEL_WIDTH
 		});
 
-		this._canvasManager = new CanvasManager(this, {});
+		this.mCanvasManager = new CanvasManager(this, {});
 
-		this._toolManager = new ToolManager(this, {});
+		this.mToolManager = new ToolManager(this, {});
 
-		this._selectionManager = new SelectionManager(this, {});
+		this.mSelectionManager = new SelectionManager(this, {});
 
-		this._zoomManager = new ZoomManager(this, {
-			zoom: options?.zoom || 1,
-		});
+		this.mZoomManager = new ZoomManager(this, { zoom: options?.zoom ?? 1 });
 
 		this.canvasManager.startCanvas();
 	}
 
 	public get domManager(): DOMManager {
-		return this._domManager;
+		return this.mDomManager;
 	}
 
 	public get canvasManager(): CanvasManager {
-		return this._canvasManager;
+		return this.mCanvasManager;
 	}
 
 	public get toolManager(): ToolManager {
-		return this._toolManager;
+		return this.mToolManager;
 	}
 
 	public get selectionManager(): SelectionManager {
-		return this._selectionManager;
+		return this.mSelectionManager;
 	}
 
 	public get zoomManager(): ZoomManager {
-		return this._zoomManager;
+		return this.mZoomManager;
 	}
 }

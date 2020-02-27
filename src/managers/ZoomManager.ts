@@ -5,20 +5,20 @@ export interface IZoomManagerOptions {
 }
 
 export class ZoomManager {
-	private graphEditor: GraphEditor;
-	private _zoom: number;
+	private readonly mGraphEditor: GraphEditor;
+	private mZoom: number;
 
 	public constructor(graphEditor: GraphEditor, options?: IZoomManagerOptions) {
-		this.graphEditor = graphEditor;
+		this.mGraphEditor = graphEditor;
 
-		this._zoom = options?.zoom || 1;
+		this.mZoom = options?.zoom ?? 1;
 	}
 
 	public get zoom(): number {
-		return this._zoom;
+		return this.mZoom;
 	}
 
 	public set zoom(value: number) {
-		this._zoom = value;
+		this.mZoom = value;
 	}
 }

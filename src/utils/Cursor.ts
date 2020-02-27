@@ -1,22 +1,23 @@
 export enum Cursor {
-	// General
+
+	/* General */
 	DEFAULT = 'default',
 	NONE = 'none',
 
-	// Links and status
+	/* Links and status */
 	CONTEXT_MENU = 'context-menu',
 	HELP = 'help',
 	POINTER = 'pointer',
 	PROGRESS = 'progress',
 	WAIT = 'wait',
 
-	// Selection
+	/* Selection */
 	CELL = 'cell',
 	CROSSHAIR = 'crosshair',
 	TEXT = 'text',
 	VERTICAL_TEXT = 'vertical-text',
 
-	// Drag & drop
+	/* Drag & drop */
 	ALIAS = 'alias',
 	COPY = 'copy',
 	MOVE = 'move',
@@ -25,7 +26,7 @@ export enum Cursor {
 	GRAB = 'grab',
 	GRABBING = 'grabbing',
 
-	// Resizing and scrolling
+	/* Resizing and scrolling */
 	ALL_SCROLL = 'all-scroll',
 	COL_RESIZE = 'col-resize',
 	ROW_RESIZE = 'row-resize',
@@ -42,7 +43,7 @@ export enum Cursor {
 	NESW_RESIZE = 'nesw-resize',
 	NWSE_RESIZE = 'nwse-resize',
 
-	// Zooming
+	/* Zooming */
 	ZOOM_IN = 'zoom-in',
 	ZOOM_OUT = 'zoom-out',
 }

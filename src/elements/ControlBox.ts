@@ -1,4 +1,4 @@
-import { Element, BoundingBox } from './Element';
+import { BoundingBox, Element } from './Element';
 import { ControlPoint, ControlPointCursor, IControlPointHost } from './ControlPoint';
 
 export interface IControlBoxHost {
@@ -11,164 +11,120 @@ export interface IControlBoxHost {
 }
 
 export class ControlBox extends Element implements IControlPointHost {
-	private host: IControlBoxHost;
+	private readonly mHost: IControlBoxHost;
 
-	private topLeft: ControlPoint;
-	private top: ControlPoint;
-	private topRight: ControlPoint;
-	private left: ControlPoint;
-	private right: ControlPoint;
-	private bottomLeft: ControlPoint;
-	private bottom: ControlPoint;
-	private bottomRight: ControlPoint;
+	private readonly mTopLeft: ControlPoint;
+	private readonly mTop: ControlPoint;
+	private readonly mTopRight: ControlPoint;
+	private readonly mLeft: ControlPoint;
+	private readonly mRight: ControlPoint;
+	private readonly mBottomLeft: ControlPoint;
+	private readonly mBottom: ControlPoint;
+	private readonly mBottomRight: ControlPoint;
+
+	private mControlPointStartedMovePropagationLock = false;
+	private mControlPointMovedToPropagationLock = false;
+	private mControlPointFinishedMovePropagationLock = false;
+	private mControlPointCanceledMovePropagationLock = false;
 
 	public constructor(host: IControlBoxHost & Element, options: { radius?: number; boundingBox: BoundingBox }) {
 		super(host.parent);
-		this.host = host;
+		this.mHost = host;
 		const { x, y, width, height } = options.boundingBox;
-		const radius = options.radius || ControlPoint.CONTROLPOINT_RADIUS;
+		const radius = options.radius ?? ControlPoint.CONTROLPOINT_RADIUS;
 
-		this.topLeft = new ControlPoint(this, x, y, { radius: radius, cursor: ControlPointCursor.TOP_LEFT });
-		this.top = new ControlPoint(this, x + width / 2, y, { radius: radius, cursor: ControlPointCursor.TOP });
-		this.topRight = new ControlPoint(this, x + width, y, { radius: radius, cursor: ControlPointCursor.TOP_RIGHT });
-		this.left = new ControlPoint(this, x, y + height / 2, { radius: radius, cursor: ControlPointCursor.LEFT });
-		this.right = new ControlPoint(this, x + width, y + height / 2, {
+		this.mTopLeft = new ControlPoint(this, x, y, { radius: radius, cursor: ControlPointCursor.TOP_LEFT });
+		this.mTop = new ControlPoint(this, x + (width / 2), y, { radius: radius, cursor: ControlPointCursor.TOP });
+		this.mTopRight = new ControlPoint(this, x + width, y, { radius: radius, cursor: ControlPointCursor.TOP_RIGHT });
+		this.mLeft = new ControlPoint(this, x, y + (height / 2), { radius: radius, cursor: ControlPointCursor.LEFT });
+		this.mRight = new ControlPoint(this, x + width, y + (height / 2), {
 			radius: radius,
-			cursor: ControlPointCursor.RIGHT,
+			cursor: ControlPointCursor.RIGHT
 		});
-		this.bottomLeft = new ControlPoint(this, x, y + height, {
+		this.mBottomLeft = new ControlPoint(this, x, y + height, {
 			radius: radius,
-			cursor: ControlPointCursor.BOTTOM_LEFT,
+			cursor: ControlPointCursor.BOTTOM_LEFT
 		});
-		this.bottom = new ControlPoint(this, x + width / 2, y + height, {
+		this.mBottom = new ControlPoint(this, x + (width / 2), y + height, {
 			radius: radius,
-			cursor: ControlPointCursor.BOTTOM,
+			cursor: ControlPointCursor.BOTTOM
 		});
-		this.bottomRight = new ControlPoint(this, x + width, y + height, {
+		this.mBottomRight = new ControlPoint(this, x + width, y + height, {
 			radius: radius,
-			cursor: ControlPointCursor.BOTTOM_RIGHT,
+			cursor: ControlPointCursor.BOTTOM_RIGHT
 		});
 	}
 
-	private controlPointStartedMovePropagationLock = false;
 	public controlPointStartedMove(controlPoint: ControlPoint): void {
-		if (!this.controlPointStartedMovePropagationLock) {
-			this.controlPointStartedMovePropagationLock = true;
+		if(!this.mControlPointStartedMovePropagationLock) {
+			this.mControlPointStartedMovePropagationLock = true;
 
 			this.controlPointMovingAction(controlPoint, ControlPoint.prototype.startMove);
-			this.host.controlBoxStartedResize(this);
+			this.mHost.controlBoxStartedResize(this);
 
-			this.controlPointStartedMovePropagationLock = false;
+			this.mControlPointStartedMovePropagationLock = false;
 		}
 	}
 
-	private controlPointMovedToPropagationLock = false;
 	public controlPointMovedTo(controlPoint: ControlPoint): void {
-		if (!this.controlPointMovedToPropagationLock) {
-			this.controlPointMovedToPropagationLock = true;
+		if(!this.mControlPointMovedToPropagationLock) {
+			this.mControlPointMovedToPropagationLock = true;
 
 			this.controlPointMovingAction(controlPoint, ControlPoint.prototype.moveTo);
-			this.host.controlBoxResizedTo(this);
+			this.mHost.controlBoxResizedTo(this);
 
-			this.controlPointMovedToPropagationLock = false;
+			this.mControlPointMovedToPropagationLock = false;
 		}
 	}
 
-	private controlPointFinishedMovePropagationLock = false;
 	public controlPointFinishedMove(controlPoint: ControlPoint): void {
-		if (!this.controlPointFinishedMovePropagationLock) {
-			this.controlPointFinishedMovePropagationLock = true;
+		if(!this.mControlPointFinishedMovePropagationLock) {
+			this.mControlPointFinishedMovePropagationLock = true;
 
 			this.controlPointMovingAction(controlPoint, ControlPoint.prototype.finishMove);
-			this.host.controlBoxFinishedResize(this);
+			this.mHost.controlBoxFinishedResize(this);
 
-			this.controlPointFinishedMovePropagationLock = false;
+			this.mControlPointFinishedMovePropagationLock = false;
 		}
 	}
 
-	private controlPointCanceledMovePropagationLock = false;
 	public controlPointCanceledMove(_controlPoint: ControlPoint): void {
-		if (!this.controlPointCanceledMovePropagationLock) {
-			this.controlPointCanceledMovePropagationLock = true;
+		if(!this.mControlPointCanceledMovePropagationLock) {
+			this.mControlPointCanceledMovePropagationLock = true;
 
-			for (const controlPoint of this.controlPoints) {
+			for(const controlPoint of this.controlPoints) {
 				controlPoint.cancelMove();
 			}
-			this.host.controlBoxCanceledResize(this);
+			this.mHost.controlBoxCanceledResize(this);
 
-			this.controlPointCanceledMovePropagationLock = false;
+			this.mControlPointCanceledMovePropagationLock = false;
 		}
 	}
 
-	private controlPointMovingAction(controlPoint: ControlPoint, movingAction: (x: number, y: number) => void): void {
-		let topX = Math.min(this.topLeft.x, this.left.x, this.bottomLeft.x);
-		let topY = Math.min(this.topLeft.y, this.top.y, this.topRight.y);
-		let bottomX = Math.max(this.topRight.x, this.right.x, this.bottomRight.x);
-		let bottomY = Math.max(this.bottomLeft.y, this.bottom.y, this.bottomRight.y);
+	public startMove(boundingBox: BoundingBox): void {
+		this.mControlPointStartedMovePropagationLock = true;
+		this.moveControlBoxTo(boundingBox, ControlPoint.prototype.startMove);
+		this.mControlPointStartedMovePropagationLock = false;
+	}
 
-		if (controlPoint == this.topLeft) {
-			topX = Math.min(this.topLeft.x, bottomX);
-			topY = Math.min(this.topLeft.y, bottomY);
-		} else if (controlPoint == this.top) {
-			topY = Math.min(this.top.y, bottomY);
-		} else if (controlPoint == this.topRight) {
-			bottomX = Math.max(this.topRight.x, topX);
-			topY = Math.min(this.topRight.y, bottomY);
-		} else if (controlPoint == this.left) {
-			topX = Math.min(this.left.x, bottomX);
-		} else if (controlPoint == this.right) {
-			bottomX = Math.max(this.right.x, topX);
-		} else if (controlPoint == this.bottomLeft) {
-			topX = Math.min(this.bottomLeft.x, bottomX);
-			bottomY = Math.max(this.bottomLeft.y, topY);
-		} else if (controlPoint == this.bottom) {
-			bottomY = Math.max(this.bottom.y, topY);
-		} else if (controlPoint == this.bottomRight) {
-			bottomX = Math.max(this.bottomRight.x, topX);
-			bottomY = Math.max(this.bottomRight.y, topY);
+	public moveTo(boundingBox: BoundingBox): void {
+		this.mControlPointMovedToPropagationLock = true;
+		this.moveControlBoxTo(boundingBox, ControlPoint.prototype.moveTo);
+		this.mControlPointMovedToPropagationLock = false;
+	}
+
+	public finishMove(boundingBox: BoundingBox): void {
+		this.mControlPointFinishedMovePropagationLock = true;
+		this.moveControlBoxTo(boundingBox, ControlPoint.prototype.finishMove);
+		this.mControlPointFinishedMovePropagationLock = false;
+	}
+
+	public cancelMove(): void {
+		this.mControlPointCanceledMovePropagationLock = true;
+		for(const controlPoint of this.controlPoints) {
+			controlPoint.cancelMove();
 		}
-
-		const { width: newWidth, height: newHeight } = this.host.controlBoxValidateSizing(
-			bottomX - topX,
-			bottomY - topY,
-		);
-
-		if (controlPoint == this.topLeft) {
-			topX = bottomX - newWidth;
-			topY = bottomY - newHeight;
-		} else if (controlPoint == this.top) {
-			[topX, bottomX] = [(topX + bottomX - newWidth) / 2, (topX + bottomX + newWidth) / 2];
-			topY = bottomY - newHeight;
-		} else if (controlPoint == this.topRight) {
-			bottomX = topX + newWidth;
-			topY = bottomY - newHeight;
-		} else if (controlPoint == this.left) {
-			topX = bottomX - newWidth;
-			[topY, bottomY] = [(topY + bottomY - newHeight) / 2, (topY + bottomY + newHeight) / 2];
-		} else if (controlPoint == this.right) {
-			bottomX = topX + newWidth;
-			[topY, bottomY] = [(topY + bottomY - newHeight) / 2, (topY + bottomY + newHeight) / 2];
-		} else if (controlPoint == this.bottomLeft) {
-			topX = bottomX - newWidth;
-			bottomY = topY + newHeight;
-		} else if (controlPoint == this.bottom) {
-			[topX, bottomX] = [(topX + bottomX - newWidth) / 2, (topX + bottomX + newWidth) / 2];
-			bottomY = topY + newHeight;
-		} else if (controlPoint == this.bottomRight) {
-			bottomX = topX + newWidth;
-			bottomY = topY + newHeight;
-		}
-
-		movingAction.call(this.topLeft, topX, topY);
-		movingAction.call(this.top, (topX + bottomX) / 2, topY);
-		movingAction.call(this.topRight, bottomX, topY);
-		movingAction.call(this.left, topX, (topY + bottomY) / 2);
-		movingAction.call(this.right, bottomX, (topY + bottomY) / 2);
-		movingAction.call(this.bottomLeft, topX, bottomY);
-		movingAction.call(this.bottom, (topX + bottomX) / 2, bottomY);
-		movingAction.call(this.bottomRight, bottomX, bottomY);
-
-		this.invalidate();
+		this.mControlPointCanceledMovePropagationLock = false;
 	}
 
 	public draw(c: CanvasRenderingContext2D): void {
@@ -176,40 +132,140 @@ export class ControlBox extends Element implements IControlPointHost {
 
 		c.strokeStyle = Element.SELECTED_STROKESTYLE;
 		c.strokeRect(x, y, width, height);
-		for (const controlPoint of this.controlPoints) {
+		for(const controlPoint of this.controlPoints) {
 			controlPoint.draw(c);
 		}
 	}
 
 	public get boundingBox(): BoundingBox {
 		return {
-			x: this.topLeft.x,
-			y: this.topLeft.y,
-			width: this.bottomRight.x - this.topLeft.x,
-			height: this.bottomRight.y - this.topLeft.y,
+			x: this.mTopLeft.x,
+			y: this.mTopLeft.y,
+			width: this.mBottomRight.x - this.mTopLeft.x,
+			height: this.mBottomRight.y - this.mTopLeft.y
 		};
 	}
 
 	public getElementUnderPosition(x: number, y: number): Element | null {
-		for (const controlPoint of this.controlPoints) {
+		for(const controlPoint of this.controlPoints) {
 			const el = controlPoint.getElementUnderPosition(x, y);
-			if (el != null) {
+			if(el !== null) {
 				return el;
 			}
 		}
 		return null;
 	}
 
+	private controlPointMovingAction(
+		controlPoint: ControlPoint | null,
+		movingAction: (x: number, y: number) => void
+	): void {
+		let topX = Math.min(this.mTopLeft.x, this.mLeft.x, this.mBottomLeft.x);
+		let topY = Math.min(this.mTopLeft.y, this.mTop.y, this.mTopRight.y);
+		let bottomX = Math.max(this.mTopRight.x, this.mRight.x, this.mBottomRight.x);
+		let bottomY = Math.max(this.mBottomLeft.y, this.mBottom.y, this.mBottomRight.y);
+
+		if(controlPoint === this.mTopLeft) {
+			topX = Math.min(this.mTopLeft.x, bottomX);
+			topY = Math.min(this.mTopLeft.y, bottomY);
+		}
+		else if(controlPoint === this.mTop) {
+			topY = Math.min(this.mTop.y, bottomY);
+		}
+		else if(controlPoint === this.mTopRight) {
+			bottomX = Math.max(this.mTopRight.x, topX);
+			topY = Math.min(this.mTopRight.y, bottomY);
+		}
+		else if(controlPoint === this.mLeft) {
+			topX = Math.min(this.mLeft.x, bottomX);
+		}
+		else if(controlPoint === this.mRight) {
+			bottomX = Math.max(this.mRight.x, topX);
+		}
+		else if(controlPoint === this.mBottomLeft) {
+			topX = Math.min(this.mBottomLeft.x, bottomX);
+			bottomY = Math.max(this.mBottomLeft.y, topY);
+		}
+		else if(controlPoint === this.mBottom) {
+			bottomY = Math.max(this.mBottom.y, topY);
+		}
+		else if(controlPoint === this.mBottomRight) {
+			bottomX = Math.max(this.mBottomRight.x, topX);
+			bottomY = Math.max(this.mBottomRight.y, topY);
+		}
+
+		const { width: newWidth, height: newHeight } = this.mHost.controlBoxValidateSizing(
+			bottomX - topX,
+			bottomY - topY
+		);
+
+		if(controlPoint === this.mTopLeft) {
+			topX = bottomX - newWidth;
+			topY = bottomY - newHeight;
+		}
+		else if(controlPoint === this.mTop) {
+			[topX, bottomX] = [(topX + bottomX - newWidth) / 2, (topX + bottomX + newWidth) / 2];
+			topY = bottomY - newHeight;
+		}
+		else if(controlPoint === this.mTopRight) {
+			bottomX = topX + newWidth;
+			topY = bottomY - newHeight;
+		}
+		else if(controlPoint === this.mLeft) {
+			topX = bottomX - newWidth;
+			[topY, bottomY] = [(topY + bottomY - newHeight) / 2, (topY + bottomY + newHeight) / 2];
+		}
+		else if(controlPoint === this.mRight) {
+			bottomX = topX + newWidth;
+			[topY, bottomY] = [(topY + bottomY - newHeight) / 2, (topY + bottomY + newHeight) / 2];
+		}
+		else if(controlPoint === this.mBottomLeft) {
+			topX = bottomX - newWidth;
+			bottomY = topY + newHeight;
+		}
+		else if(controlPoint === this.mBottom) {
+			[topX, bottomX] = [(topX + bottomX - newWidth) / 2, (topX + bottomX + newWidth) / 2];
+			bottomY = topY + newHeight;
+		}
+		else if(controlPoint === this.mBottomRight) {
+			bottomX = topX + newWidth;
+			bottomY = topY + newHeight;
+		}
+
+		movingAction.call(this.mTopLeft, topX, topY);
+		movingAction.call(this.mTop, (topX + bottomX) / 2, topY);
+		movingAction.call(this.mTopRight, bottomX, topY);
+		movingAction.call(this.mLeft, topX, (topY + bottomY) / 2);
+		movingAction.call(this.mRight, bottomX, (topY + bottomY) / 2);
+		movingAction.call(this.mBottomLeft, topX, bottomY);
+		movingAction.call(this.mBottom, (topX + bottomX) / 2, bottomY);
+		movingAction.call(this.mBottomRight, bottomX, bottomY);
+
+		this.invalidate();
+	}
+
+	private moveControlBoxTo(boundingBox: BoundingBox, movingAction: (x: number, y: number) => void): void {
+		const { x, y, width, height } = boundingBox;
+		movingAction.call(this.mTopLeft, x, y);
+		movingAction.call(this.mTop, x + (width / 2), y);
+		movingAction.call(this.mTopRight, x + width, y);
+		movingAction.call(this.mLeft, x, y + (height / 2));
+		movingAction.call(this.mRight, x + width, y + (height / 2));
+		movingAction.call(this.mBottomLeft, x, y + height);
+		movingAction.call(this.mBottom, x + (width / 2), y + height);
+		movingAction.call(this.mBottomRight, x + width, y + height);
+	}
+
 	private get controlPoints(): ControlPoint[] {
 		return [
-			this.topLeft,
-			this.top,
-			this.topRight,
-			this.left,
-			this.right,
-			this.bottomLeft,
-			this.bottom,
-			this.bottomRight,
+			this.mTopLeft,
+			this.mTop,
+			this.mTopRight,
+			this.mLeft,
+			this.mRight,
+			this.mBottomLeft,
+			this.mBottom,
+			this.mBottomRight
 		];
 	}
 }

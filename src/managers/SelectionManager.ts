@@ -1,54 +1,54 @@
+import { Element } from '../elements/Element';
 import { GraphEditor } from '../GraphEditor';
 import { ISelectable } from '../tools/Selector';
-import { Element } from '../elements/Element';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ISelectionManagerOptions {}
 
 export class SelectionManager {
-	private graphEditor: GraphEditor;
-	private _selected: (Element & ISelectable)[];
+	private readonly mGraphEditor: GraphEditor;
+	private mSelected: (Element & ISelectable)[];
 
 	public constructor(graphEditor: GraphEditor, _options?: ISelectionManagerOptions) {
-		this.graphEditor = graphEditor;
+		this.mGraphEditor = graphEditor;
 
-		this._selected = [];
+		this.mSelected = [];
 	}
 
 	public get selected(): Element[] {
-		return this._selected;
+		return this.mSelected;
 	}
 
 	public get focused(): Element | null {
-		if (this.selected.length != 1) return null;
+		if(this.selected.length !== 1) return null;
 		else return this.selected[0];
 	}
 
 	public isSelected(el: Element & ISelectable): boolean {
-		return this._selected.indexOf(el) != -1;
+		return this.mSelected.indexOf(el) !== -1;
 	}
 
 	public isFocused(el: Element & ISelectable): boolean {
-		return this.focused == el;
+		return this.focused === el;
 	}
 
 	public select(el: Element & ISelectable): void {
-		if (this._selected.indexOf(el) == -1) {
-			this._selected.push(el);
-			this.graphEditor.canvasManager.invalidate();
+		if(this.mSelected.indexOf(el) === -1) {
+			this.mSelected.push(el);
+			this.mGraphEditor.canvasManager.invalidate();
 		}
 	}
 
 	public unselect(el: Element & ISelectable): void {
-		const idx = this._selected.indexOf(el);
-		if (idx != -1) {
-			this._selected.splice(idx, 1);
-			this.graphEditor.canvasManager.invalidate();
+		const idx = this.mSelected.indexOf(el);
+		if(idx !== -1) {
+			this.mSelected.splice(idx, 1);
+			this.mGraphEditor.canvasManager.invalidate();
 		}
 	}
 
 	public unselectAll(): void {
-		this._selected = [];
-		this.graphEditor.canvasManager.invalidate();
+		this.mSelected = [];
+		this.mGraphEditor.canvasManager.invalidate();
 	}
 }
