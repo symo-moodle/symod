@@ -1,7 +1,7 @@
 import { BoundingBox, Element } from './Element';
 import { IActionable, IMovable, ISelectable } from '../tools/Selector';
 import { Cursor } from '../utils/Cursor';
-import { SettingsGroups } from '../managers/SettingsPopup';
+import { SettingsGroups } from '../managers/popups/SettingsWindowPopup';
 import { Stage } from './Stage';
 
 export interface ILabelHost {

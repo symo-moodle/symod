@@ -1,28 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as JSXFactory from 'jsx-dom';
 import { GraphEditor } from '../GraphEditor';
 import { MouseButtons } from '../utils/MouseButtons';
-import { SettingsPopup } from './SettingsPopup';
-import { TextEditor } from './TextEditor';
-
-function graphEditorDOM(id: string): string {
-	return `
-        <div id="${id}" class="grapheditor">
-            <table>
-                <tr>
-                    <td id="${id}_panel" class="panel"></td>
-                    <td id="${id}_canvasbox" class="canvasbox">
-						<div>
-							<div id="${id}_overlay" class="overlay">
-								<textarea id="${id}_textarea"></textarea>
-								<div id="${id}_settings" class="settings"></div>
-							</div>
-							<canvas id="${id}_canvas"></canvas>
-						</div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    `;
-}
+import { SettingsWindowPopup } from './popups/SettingsWindowPopup';
+import { TextEditorPopup } from './popups/TextEditorPopup';
 
 export interface IDOMManagerOptions {
 	id: string;
@@ -45,8 +26,8 @@ export class DOMManager {
 	private mCanvasElement!: HTMLCanvasElement;
 	private mCanvasOverlayElement!: HTMLElement;
 
-	private mTextEditor!: TextEditor;
-	private mSettingsPopup!: SettingsPopup;
+	private mTextEditor!: TextEditorPopup;
+	private mSettingsPopup!: SettingsWindowPopup;
 
 	public constructor(graphEditor: GraphEditor, options: IDOMManagerOptions) {
 		this.mGraphEditor = graphEditor;
@@ -110,36 +91,33 @@ export class DOMManager {
 		return this.mCanvasElement.getContext('2d')!;
 	}
 
-	public get textEditor(): TextEditor {
+	public get textEditor(): TextEditorPopup {
 		return this.mTextEditor;
 	}
 
-	public get settingsPopup(): SettingsPopup {
+	public get settingsPopup(): SettingsWindowPopup {
 		return this.mSettingsPopup;
 	}
 
-	public showOverlay(): void {
-		this.mCanvasOverlayElement.style.visibility = 'visible';
-	}
-
-	public hideOverlay(): void {
-		this.mCanvasOverlayElement.style.visibility = 'hidden';
-	}
-
 	private createDOM(): void {
-		/* eslint-disable @typescript-eslint/no-non-null-assertion */
-		const doc = new DOMParser().parseFromString(graphEditorDOM(this.mId), 'text/html');
-		this.mRootElement = doc.getElementById(this.mId)!;
-		this.mPanelElement = doc.getElementById(`${this.mId}_panel`)!;
-		this.mCanvasBoxElement = doc.getElementById(`${this.mId}_canvasbox`)!;
-		this.mCanvasElement = doc.getElementById(`${this.mId}_canvas`)! as HTMLCanvasElement;
-		this.mCanvasOverlayElement = doc.getElementById(`${this.mId}_overlay`)!;
-		const textEditorElement = doc.getElementById(`${this.mId}_textarea`)! as HTMLTextAreaElement;
-		const settingsPopupElement = doc.getElementById(`${this.mId}_settings`)!;
-		/* eslint-enable @typescript-eslint/no-non-null-assertion */
+		this.mRootElement = (
+			<div id={this.mId} class="grapheditor">
+				<table>
+					<tr>
+						{this.mPanelElement = (<td class="panel"></td>)}
+						{this.mCanvasBoxElement = (<td class="canvasbox">
+							<div>
+								{this.mCanvasOverlayElement = (<div class="overlay"></div>)}
+								{this.mCanvasElement = (<canvas></canvas> as HTMLCanvasElement)}
+							</div>
+						</td>)}
+					</tr>
+				</table>
+			</div>
+		);
 
-		this.mTextEditor = new TextEditor(this.mGraphEditor, textEditorElement);
-		this.mSettingsPopup = new SettingsPopup(this.mGraphEditor, settingsPopupElement);
+		this.mTextEditor = new TextEditorPopup(this.mGraphEditor, this.mCanvasOverlayElement);
+		this.mSettingsPopup = new SettingsWindowPopup(this.mGraphEditor, this.mCanvasOverlayElement);
 
 		this.mCanvasElement.onmousemove = this.onMouseMove.bind(this);
 		this.mCanvasElement.onmousedown = this.onMouseDown.bind(this);

@@ -17,10 +17,12 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"@rollup/plugin-node-resolve": "^7.1.1",
 		"@typescript-eslint/eslint-plugin": "^2.21.0",
 		"@typescript-eslint/parser": "^2.21.0",
 		"eslint": "^6.8.0",
 		"eslint-plugin-editorconfig": "^2.1.2",
+		"jsx-dom": "^6.4.10",
 		"rollup": "^1.31.1",
 		"rollup-plugin-terser": "^5.2.0",
 		"rollup-plugin-typescript2": "^0.26.0",

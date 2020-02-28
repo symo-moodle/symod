@@ -1,6 +1,8 @@
-import { Element } from '../elements/Element';
-import { GraphEditor } from '../GraphEditor';
-import { KeyCodes } from '../utils/KeyCodes';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as JSXFactory from 'jsx-dom';
+import { Element } from '../../elements/Element';
+import { GraphEditor } from '../../GraphEditor';
+import { KeyCodes } from '../../utils/KeyCodes';
 
 export interface IShowTextEditorOptions {
 	x: number;
@@ -13,21 +15,24 @@ export interface IShowTextEditorOptions {
 	fontColor?: string;
 }
 
-export class TextEditor {
+export class TextEditorPopup {
 	private readonly mGraphEditor: GraphEditor;
-	private mTextEditorElement: HTMLTextAreaElement;
+	private readonly mOverlayElement: HTMLElement;
+	private readonly mTextEditorElement: HTMLTextAreaElement;
 	private mMultiline: boolean;
 	private mOnTextEditingFinished: ((text: string) => void) | null;
 
-	public constructor(graphEditor: GraphEditor, textEditorElement: HTMLTextAreaElement) {
+	public constructor(graphEditor: GraphEditor, overlayElement: HTMLElement) {
 		this.mGraphEditor = graphEditor;
-		this.mTextEditorElement = textEditorElement;
+		this.mOverlayElement = overlayElement;
 		this.mMultiline = false;
 		this.mOnTextEditingFinished = null;
 
+		this.mTextEditorElement = (<textarea></textarea> as HTMLTextAreaElement);
 		this.mTextEditorElement.onblur = this.onTextareaFocusLose.bind(this);
 		this.mTextEditorElement.onkeydown = this.onTextareaKeyDown.bind(this);
 		this.mTextEditorElement.style.display = 'none';
+		this.mOverlayElement.appendChild(this.mTextEditorElement);
 	}
 
 	public showTextEditor(
@@ -55,7 +60,7 @@ export class TextEditor {
 		this.mTextEditorElement.style.textAlign = textAlign;
 		this.mTextEditorElement.style.outlineColor = Element.SELECTED_STROKESTYLE;
 
-		this.mGraphEditor.domManager.showOverlay();
+		this.mOverlayElement.style.visibility = 'visible';
 		this.mTextEditorElement.style.display = 'block';
 		this.mTextEditorElement.focus();
 	}
@@ -71,7 +76,7 @@ export class TextEditor {
 	}
 
 	private onTextareaFocusLose(): void {
-		this.mGraphEditor.domManager.hideOverlay();
+		this.mOverlayElement.style.visibility = 'hidden';
 		this.mTextEditorElement.style.display = 'none';
 		const text = this.mTextEditorElement.value;
 		if(this.mOnTextEditingFinished !== null) {

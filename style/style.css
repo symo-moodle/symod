@@ -38,7 +38,7 @@
     white-space: nowrap;
 }
 
-.grapheditor .canvasbox .settings {
+.grapheditor .canvasbox .window {
     margin: 100px auto;
     max-width: 400px;
     height: calc(100% - 200px);
@@ -51,7 +51,7 @@
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 }
 
-.grapheditor .canvasbox .settings .header {
+.grapheditor .canvasbox .window .header {
     width: 100%;
     background: #cfcfcf;
     box-sizing: border-box;
@@ -65,12 +65,12 @@
     align-items: center;
 }
 
-.grapheditor .canvasbox .settings .header .title {
+.grapheditor .canvasbox .window .header .title {
     display: inline-block;
     flex-grow: 1;
 }
 
-.grapheditor .canvasbox .settings button {
+.grapheditor .canvasbox .window button {
     border-radius: 5px;
     border: 1px solid black;
     background: #efefef;
@@ -78,16 +78,16 @@
     min-height: 25px;
 }
 
-.grapheditor .canvasbox .settings button:active {
+.grapheditor .canvasbox .window button:active {
     background: #dfdfdf;
 }
 
-.grapheditor .canvasbox .settings .header .cancel {
+.grapheditor .canvasbox .window .header .cancel {
     width: 25px;
     height: 25px;
 }
 
-.grapheditor .canvasbox .settings .footer {
+.grapheditor .canvasbox .window .footer {
     width: 100%;
     background: #cfcfcf;
     box-sizing: border-box;
@@ -101,32 +101,32 @@
     align-items: center;
 }
 
-.grapheditor .canvasbox .settings .footer * {
+.grapheditor .canvasbox .window .footer * {
     margin-left: 5px;
 }
 
-.grapheditor .canvasbox .settings .main {
+.grapheditor .canvasbox .window .main {
     padding: 20px 10px;
     flex-grow: 1;
     overflow: auto;
     box-shadow: inset 0px 0px 4px 0px rgba(0,0,0,0.75);
 }
 
-.grapheditor .canvasbox .settings .main .group label {
+.grapheditor .canvasbox .window .main .group label {
     width: 100%;
     display: flex;
     justify-content: stretch;
     align-items: center;
 }
 
-.grapheditor .canvasbox .settings .main .content > * {
+.grapheditor .canvasbox .window .main .content > * {
     margin-bottom: 10px;
 }
 
-.grapheditor .canvasbox .settings .main .group label input[type=text],
-.grapheditor .canvasbox .settings .main .group label input[type=number],
-.grapheditor .canvasbox .settings .main .group label input[type=color],
-.grapheditor .canvasbox .settings .main .group label select {
+.grapheditor .canvasbox .window .main .group label input[type=text],
+.grapheditor .canvasbox .window .main .group label input[type=number],
+.grapheditor .canvasbox .window .main .group label input[type=color],
+.grapheditor .canvasbox .window .main .group label select {
     margin-left: 10px;
     flex-grow: 1;
     padding: 4px;
@@ -135,14 +135,14 @@
     background: white;
 }
 
-.grapheditor .canvasbox .settings .main .group label input[type=range] {
+.grapheditor .canvasbox .window .main .group label input[type=range] {
     margin-left: 10px;
     flex-grow: 1;
     padding: 4px;
 }
 
-.grapheditor .canvasbox .settings .main .group label input[type=checkbox],
-.grapheditor .canvasbox .settings .main .group label input[type=radio] {
+.grapheditor .canvasbox .window .main .group label input[type=checkbox],
+.grapheditor .canvasbox .window .main .group label input[type=radio] {
     margin-left: 10px;
     flex-grow: 0;
 }
