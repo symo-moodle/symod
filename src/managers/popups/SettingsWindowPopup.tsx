@@ -8,7 +8,7 @@ type TextSettings = {
 	type: 'text';
 	id: string;
 	label: string;
-	value: string;
+	text: string;
 	disabled?: boolean;
 };
 
@@ -16,7 +16,7 @@ type NumberSettings = {
 	type: 'number';
 	id: string;
 	label: string;
-	value: number;
+	number: number;
 	min?: number;
 	max?: number;
 	step?: number;
@@ -27,7 +27,7 @@ type ColorSettings = {
 	type: 'color';
 	id: string;
 	label: string;
-	value: string;
+	color: string;
 	disabled?: boolean;
 };
 
@@ -97,7 +97,7 @@ class TextSettingsControl implements ISettingsControl {
 
 	public constructor(settings: TextSettings) {
 		this.mSettings = settings;
-		const { id, label, value, disabled = false } = this.mSettings;
+		const { id, label, text: value, disabled = false } = this.mSettings;
 		this.mDom = (
 			<label>{label}
 				{this.mInput = (<input type="text" name={id} value={value} disabled={disabled}/>) as HTMLInputElement}
@@ -110,7 +110,7 @@ class TextSettingsControl implements ISettingsControl {
 	}
 
 	public updateSetting(): void {
-		this.mSettings.value = this.mInput.value;
+		this.mSettings.text = this.mInput.value;
 	}
 }
 
@@ -121,7 +121,7 @@ class NumberSettingsControl implements ISettingsControl {
 
 	public constructor(settings: NumberSettings) {
 		this.mSettings = settings;
-		const { id, label, min = NaN, max = NaN, step = NaN, value, disabled = false } = this.mSettings;
+		const { id, label, min = NaN, max = NaN, step = NaN, number: value, disabled = false } = this.mSettings;
 		this.mDom = (
 			<label>{label}
 				{this.mInput = (
@@ -136,7 +136,7 @@ class NumberSettingsControl implements ISettingsControl {
 	}
 
 	public updateSetting(): void {
-		this.mSettings.value = parseFloat(this.mInput.value);
+		this.mSettings.number = parseFloat(this.mInput.value);
 	}
 }
 
@@ -147,7 +147,7 @@ class ColorSettingsControl implements ISettingsControl {
 
 	public constructor(settings: ColorSettings) {
 		this.mSettings = settings;
-		const { id, label, value, disabled = false } = this.mSettings;
+		const { id, label, color: value, disabled = false } = this.mSettings;
 		this.mDom = (
 			<label>{label}
 				{this.mInput = (<input type="color" name={id} value={value} disabled={disabled}/>) as HTMLInputElement}
@@ -160,7 +160,7 @@ class ColorSettingsControl implements ISettingsControl {
 	}
 
 	public updateSetting(): void {
-		this.mSettings.value = this.mInput.value;
+		this.mSettings.color = this.mInput.value;
 	}
 }
 

@@ -209,9 +209,9 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 				{
 					name: 'Label',
 					elements: [
-						{ type: 'text' as const, id: 'LABEL1', label: 'Label', value: '', disabled: false },
-						{ type: 'number' as const, id: 'LABEL2', label: 'Label', value: 0 },
-						{ type: 'color' as const, id: 'LABEL3', label: 'Label', value: '#FF0000', disabled: false },
+						{ type: 'text' as const, id: 'LABEL1', label: 'Label', text: '', disabled: false },
+						{ type: 'number' as const, id: 'LABEL2', label: 'Label', number: 0 },
+						{ type: 'color' as const, id: 'LABEL3', label: 'Label', color: '#FF0000', disabled: false },
 						{ type: 'range' as const, id: 'LABEL4', label: 'Label', value: 0, min: 0, max: 100 },
 						{ type: 'checkbox' as const, id: 'LABEL5', label: 'Label', checked: true },
 						{
