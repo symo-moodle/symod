@@ -1,7 +1,7 @@
-import { Element } from './Element';
+import { BaseElement } from './BaseElement';
 
-export class Edge extends Element {
-	public getElementUnderPosition(_x: number, _y: number): Element {
+export class Edge extends BaseElement {
+	public getElementUnderPosition(_x: number, _y: number): BaseElement {
 		throw new Error('Method not implemented.');
 	}
 

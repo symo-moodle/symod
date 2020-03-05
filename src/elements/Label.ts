@@ -1,7 +1,7 @@
-import { BoundingBox, Element } from './Element';
+import { BaseElement, BoundingBox } from './BaseElement';
 import { IActionable, IMovable, ISelectable } from '../tools/Selector';
+import { SettingsGroups, SettingsWindowPopup } from '../popups/SettingsWindowPopup';
 import { Cursor } from '../utils/Cursor';
-import { SettingsGroups } from '../managers/popups/SettingsWindowPopup';
 import { Stage } from './Stage';
 
 export interface ILabelHost {
@@ -38,7 +38,7 @@ export interface ILabelOptions {
 	fontFamily?: FontFamily;
 }
 
-export class Label extends Element implements ISelectable, IMovable, IActionable {
+export class Label extends BaseElement implements ISelectable, IMovable, IActionable {
 	private mX: number;
 	private mY: number;
 	private mWidth: number;
@@ -54,7 +54,7 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 	private readonly mLineHeight: number;
 	private readonly mFontFamily: FontFamily;
 
-	private readonly mOwner: (Element & ILabelHost) | null;
+	private readonly mOwner: (BaseElement & ILabelHost) | null;
 
 	private mIsMoving: boolean;
 	private mMoveStartX: number;
@@ -68,8 +68,14 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 	private readonly mMinHeight: number | null;
 	private readonly mMaxHeight: number | null;
 
-	public constructor(owner: (Element & ILabelHost) | Stage, options: ILabelOptions) {
-		super(owner instanceof Stage ? owner : owner.parent);
+	public constructor(owner: (BaseElement & ILabelHost) | Stage, options: ILabelOptions) {
+		if(owner instanceof Stage) {
+			super(owner);
+		}
+		else {
+			if(owner.parent === null) throw new Error('parent can only be null for the root stage');
+			else super(owner.parent);
+		}
 
 		this.mOwner = owner instanceof Stage ? null : owner;
 
@@ -138,14 +144,14 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 		}
 
 		if(this.isSelected) {
-			c.strokeStyle = Element.SELECTED_STROKESTYLE;
+			c.strokeStyle = BaseElement.SELECTED_STROKESTYLE;
 			c.strokeRect(x, y, width, height);
 
 			if(this.mOwner !== null) {
 				c.restore();
 				c.save();
 				const { x: tx, y: ty } = this.mOwner.getLabelOwnershipHintLocation(x + (width / 2), y + (height / 2));
-				c.strokeStyle = Element.SELECTED_STROKESTYLE;
+				c.strokeStyle = BaseElement.SELECTED_STROKESTYLE;
 				c.lineWidth = 1;
 				c.setLineDash([10, 10]); // eslint-disable-line no-magic-numbers
 				c.beginPath();
@@ -167,7 +173,7 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 		}
 	}
 
-	public getElementUnderPosition(x: number, y: number): Element | null {
+	public getElementUnderPosition(x: number, y: number): BaseElement | null {
 		const { x: bx, y: by, width: bwidth, height: bheight } = this.boundingBox;
 		if(x >= bx && y >= by && x <= bx + bwidth && y <= by + bheight) {
 			return this;
@@ -178,11 +184,11 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 	}
 
 	public get isSelected(): boolean {
-		return this.parent?.canvas.selectionManager.isSelected(this) ?? false;
+		return this.graphEditor.selectionManager.isSelected(this);
 	}
 
 	public get isFocused(): boolean {
-		return this.parent?.canvas.selectionManager.isFocused(this) ?? false;
+		return this.graphEditor.selectionManager.isFocused(this);
 	}
 
 	public get cursor(): Cursor {
@@ -195,48 +201,44 @@ export class Label extends Element implements ISelectable, IMovable, IActionable
 	}
 
 	public doAction(_x: number, _y: number): void {
-		/*
-		 * This.parent?.canvas.domManager.textEditor.showTextEditor(this.text, this.onTextEdited.bind(this), {
-		 * x: this.x, y: this.y, width: this.width, height: this.height,
-		 * font: `${this.fontStyle} ${this.fontVariant} ${this.fontWeight} ${this.fontSize}px /${this.lineHeight} ${this.fontFamily}`,
-		 * fontColor: this.fillStyle, textAlign: this.textAlign,
-		 * multiline: true
-		 * });
-		 */
-
-		this.parent?.canvas.domManager.settingsPopup.showSettingsPopup('Label', this.onSettingsChanged.bind(this), {
-			groups: [
-				{
-					name: 'Label',
-					elements: [
-						{ type: 'text' as const, id: 'LABEL1', label: 'Label', text: '', disabled: false },
-						{ type: 'number' as const, id: 'LABEL2', label: 'Label', number: 0 },
-						{ type: 'color' as const, id: 'LABEL3', label: 'Label', color: '#FF0000', disabled: false },
-						{ type: 'range' as const, id: 'LABEL4', label: 'Label', value: 0, min: 0, max: 100 },
-						{ type: 'checkbox' as const, id: 'LABEL5', label: 'Label', checked: true },
-						{
-							type: 'radio' as const,
-							id: 'LABEL6',
-							radios: [
-								{ label: 'Label', value: 'label1' },
-								{ label: 'Label', value: 'label2', checked: true },
-								{ label: 'Label', value: 'label3' }
-							]
-						},
-						{
-							type: 'select' as const,
-							id: 'LABEL6',
-							label: 'Label',
-							options: [
-								{ label: 'Label', value: 'label1' },
-								{ label: 'Label', value: 'label2', selected: true },
-								{ label: 'Label', value: 'label3' }
-							]
-						}
-					]
-				}
-			]
-		});
+		this.graphEditor.domManager.showPopup(new SettingsWindowPopup(
+			this.graphEditor,
+			'Label',
+			this.onSettingsChanged.bind(this),
+			{
+				groups: [
+					{
+						name: 'Label',
+						elements: [
+							{ type: 'text' as const, id: 'LABEL1', label: 'Label', text: '', disabled: false },
+							{ type: 'number' as const, id: 'LABEL2', label: 'Label', number: 0 },
+							{ type: 'color' as const, id: 'LABEL3', label: 'Label', color: '#FF0000', disabled: false },
+							{ type: 'range' as const, id: 'LABEL4', label: 'Label', value: 0, min: 0, max: 100 },
+							{ type: 'checkbox' as const, id: 'LABEL5', label: 'Label', checked: true },
+							{
+								type: 'radio' as const,
+								id: 'LABEL6',
+								radios: [
+									{ label: 'Label', value: 'label1' },
+									{ label: 'Label', value: 'label2', checked: true },
+									{ label: 'Label', value: 'label3' }
+								]
+							},
+							{
+								type: 'select' as const,
+								id: 'LABEL6',
+								label: 'Label',
+								options: [
+									{ label: 'Label', value: 'label1' },
+									{ label: 'Label', value: 'label2', selected: true },
+									{ label: 'Label', value: 'label3' }
+								]
+							}
+						]
+					}
+				]
+			}
+		));
 	}
 
 	public get text(): string {

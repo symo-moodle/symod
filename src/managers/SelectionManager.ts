@@ -1,54 +1,54 @@
-import { Element } from '../elements/Element';
+import { Base } from '../utils/Base';
+import { BaseElement } from '../elements/BaseElement';
 import { GraphEditor } from '../GraphEditor';
 import { ISelectable } from '../tools/Selector';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ISelectionManagerOptions {}
 
-export class SelectionManager {
-	private readonly mGraphEditor: GraphEditor;
-	private mSelected: (Element & ISelectable)[];
+export class SelectionManager extends Base {
+	private mSelected: (BaseElement & ISelectable)[];
 
 	public constructor(graphEditor: GraphEditor, _options?: ISelectionManagerOptions) {
-		this.mGraphEditor = graphEditor;
+		super(graphEditor);
 
 		this.mSelected = [];
 	}
 
-	public get selected(): Element[] {
+	public get selected(): BaseElement[] {
 		return this.mSelected;
 	}
 
-	public get focused(): Element | null {
+	public get focused(): BaseElement | null {
 		if(this.selected.length !== 1) return null;
 		else return this.selected[0];
 	}
 
-	public isSelected(el: Element & ISelectable): boolean {
+	public isSelected(el: BaseElement & ISelectable): boolean {
 		return this.mSelected.indexOf(el) !== -1;
 	}
 
-	public isFocused(el: Element & ISelectable): boolean {
+	public isFocused(el: BaseElement & ISelectable): boolean {
 		return this.focused === el;
 	}
 
-	public select(el: Element & ISelectable): void {
+	public select(el: BaseElement & ISelectable): void {
 		if(this.mSelected.indexOf(el) === -1) {
 			this.mSelected.push(el);
-			this.mGraphEditor.canvasManager.invalidate();
+			this.graphEditor.canvasManager.invalidate();
 		}
 	}
 
-	public unselect(el: Element & ISelectable): void {
+	public unselect(el: BaseElement & ISelectable): void {
 		const idx = this.mSelected.indexOf(el);
 		if(idx !== -1) {
 			this.mSelected.splice(idx, 1);
-			this.mGraphEditor.canvasManager.invalidate();
+			this.graphEditor.canvasManager.invalidate();
 		}
 	}
 
 	public unselectAll(): void {
 		this.mSelected = [];
-		this.mGraphEditor.canvasManager.invalidate();
+		this.graphEditor.canvasManager.invalidate();
 	}
 }

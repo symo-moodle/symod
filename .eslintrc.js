@@ -74,7 +74,6 @@ module.exports = {
 		'no-shadow': 'error',
 		'no-undef-init': 'error',
 		'no-undefined': 'error',
-		'no-use-before-define': 'error',
 
 		// ES2015 practices
 		'arrow-body-style': ['error', 'as-needed'],
@@ -136,7 +135,8 @@ module.exports = {
 			{ selector: 'property', modifiers: ['static', 'readonly'], format: ['UPPER_CASE'] },
 			{ selector: 'property', modifiers: ['private', 'static', 'readonly'], format: ['UPPER_CASE'] },
 			{ selector: 'enumMember', format: ['UPPER_CASE'] },
-			{ selector: 'typeLike', format: ['PascalCase'] }
+			{ selector: 'typeLike', format: ['PascalCase'] },
+			{ selector: 'class', modifiers: ['abstract'], format: ['PascalCase'], prefix: ['Base'] }
 		],
 		'@typescript-eslint/no-dynamic-delete': 'error',
 		'@typescript-eslint/no-extra-non-null-assertion': ['error'],

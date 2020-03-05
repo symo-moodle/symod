@@ -1,4 +1,4 @@
-import { BoundingBox, Element } from './Element';
+import { BaseElement, BoundingBox } from './BaseElement';
 import { Cursor } from '../utils/Cursor';
 import { IMovable } from '../tools/Selector';
 
@@ -21,7 +21,7 @@ export interface IControlPointHost {
 	controlPointCanceledMove(controlPoint: ControlPoint): void;
 }
 
-export class ControlPoint extends Element implements IMovable {
+export class ControlPoint extends BaseElement implements IMovable {
 	// eslint-disable-next-line no-magic-numbers
 	public static readonly CONTROLPOINT_RADIUS: number = 4;
 
@@ -37,12 +37,14 @@ export class ControlPoint extends Element implements IMovable {
 	private mMovingY: number;
 
 	public constructor(
-		host: IControlPointHost & Element,
+		host: IControlPointHost & BaseElement,
 		x: number,
 		y: number,
 		options?: { radius?: number; cursor?: ControlPointCursor }
 	) {
-		super(host.parent);
+		if(host.parent === null) throw new Error('parent can only be null for the root stage');
+		else super(host.parent);
+
 		this.mHost = host;
 
 		this.mX = x;
@@ -123,8 +125,8 @@ export class ControlPoint extends Element implements IMovable {
 	}
 
 	public draw(c: CanvasRenderingContext2D): void {
-		c.strokeStyle = Element.SELECTED_STROKESTYLE;
-		c.fillStyle = Element.SELECTED_FILLSTYLE;
+		c.strokeStyle = BaseElement.SELECTED_STROKESTYLE;
+		c.fillStyle = BaseElement.SELECTED_FILLSTYLE;
 		c.beginPath();
 		c.arc(this.x, this.y, this.mRadius, 0, Math.PI * 2);
 		c.fill();
@@ -140,7 +142,7 @@ export class ControlPoint extends Element implements IMovable {
 		};
 	}
 
-	public getElementUnderPosition(x: number, y: number): Element | null {
+	public getElementUnderPosition(x: number, y: number): BaseElement | null {
 		if(((this.x - x) ** 2) + ((this.y - y) ** 2) <= this.mRadius ** 2) {
 			return this;
 		}

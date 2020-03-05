@@ -1,4 +1,4 @@
-import { BoundingBox, Element } from './Element';
+import { BaseElement, BoundingBox } from './BaseElement';
 import { ControlPoint, ControlPointCursor, IControlPointHost } from './ControlPoint';
 
 export interface IControlBoxHost {
@@ -10,7 +10,7 @@ export interface IControlBoxHost {
 	controlBoxCanceledResize(controlBox: ControlBox): void;
 }
 
-export class ControlBox extends Element implements IControlPointHost {
+export class ControlBox extends BaseElement implements IControlPointHost {
 	private readonly mHost: IControlBoxHost;
 
 	private readonly mTopLeft: ControlPoint;
@@ -22,13 +22,15 @@ export class ControlBox extends Element implements IControlPointHost {
 	private readonly mBottom: ControlPoint;
 	private readonly mBottomRight: ControlPoint;
 
-	private mControlPointStartedMovePropagationLock = false;
-	private mControlPointMovedToPropagationLock = false;
-	private mControlPointFinishedMovePropagationLock = false;
-	private mControlPointCanceledMovePropagationLock = false;
+	private mControlPointStartedMovePropagationLock: boolean;
+	private mControlPointMovedToPropagationLock: boolean;
+	private mControlPointFinishedMovePropagationLock: boolean;
+	private mControlPointCanceledMovePropagationLock: boolean;
 
-	public constructor(host: IControlBoxHost & Element, options: { radius?: number; boundingBox: BoundingBox }) {
-		super(host.parent);
+	public constructor(host: IControlBoxHost & BaseElement, options: { radius?: number; boundingBox: BoundingBox }) {
+		if(host.parent === null) throw new Error('parent can only be null for the root stage');
+		else super(host.parent);
+
 		this.mHost = host;
 		const { x, y, width, height } = options.boundingBox;
 		const radius = options.radius ?? ControlPoint.CONTROLPOINT_RADIUS;
@@ -53,6 +55,11 @@ export class ControlBox extends Element implements IControlPointHost {
 			radius: radius,
 			cursor: ControlPointCursor.BOTTOM_RIGHT
 		});
+
+		this.mControlPointStartedMovePropagationLock = false;
+		this.mControlPointMovedToPropagationLock = false;
+		this.mControlPointFinishedMovePropagationLock = false;
+		this.mControlPointCanceledMovePropagationLock = false;
 	}
 
 	public controlPointStartedMove(controlPoint: ControlPoint): void {
@@ -130,7 +137,7 @@ export class ControlBox extends Element implements IControlPointHost {
 	public draw(c: CanvasRenderingContext2D): void {
 		const { x, y, width, height } = this.boundingBox;
 
-		c.strokeStyle = Element.SELECTED_STROKESTYLE;
+		c.strokeStyle = BaseElement.SELECTED_STROKESTYLE;
 		c.strokeRect(x, y, width, height);
 		for(const controlPoint of this.controlPoints) {
 			controlPoint.draw(c);
@@ -146,7 +153,7 @@ export class ControlBox extends Element implements IControlPointHost {
 		};
 	}
 
-	public getElementUnderPosition(x: number, y: number): Element | null {
+	public getElementUnderPosition(x: number, y: number): BaseElement | null {
 		for(const controlPoint of this.controlPoints) {
 			const el = controlPoint.getElementUnderPosition(x, y);
 			if(el !== null) {

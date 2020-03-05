@@ -1,7 +1,9 @@
 /* eslint-disable no-undefined */
-import { Keys, Tool } from './Tool';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as JSXFactory from 'jsx-dom/svg';
+import { BaseTool, Keys } from './Tool';
+import { BaseElement } from '../elements/BaseElement';
 import { Cursor } from '../utils/Cursor';
-import { Element } from '../elements/Element';
 import { GraphEditor } from '../GraphEditor';
 
 export interface ISelectorAction {
@@ -56,8 +58,8 @@ function isIActionable(o: unknown): o is IActionable {
 	);
 }
 
-export class Selector extends Tool {
-	private mPossiblyClickedOrMoved: Element | null;
+export class Selector extends BaseTool {
+	private mPossiblyClickedOrMoved: BaseElement | null;
 	private mPossiblyClickedOrMovedAt: { x: number; y: number } | null;
 	private mMoving: IMovable[];
 
@@ -67,6 +69,19 @@ export class Selector extends Tool {
 		this.mPossiblyClickedOrMovedAt = null;
 		this.mMoving = [];
 	}
+
+	/* eslint-disable no-magic-numbers */
+	public getToolGUI(): { icon: SVGElement; name: string } {
+		return {
+			icon: (<svg viewBox="0 0 50 50">
+				<polygon
+					style={{ stroke: '#000000', 'stroke-width': 2, fill: '#ffffff' }}
+					points="39.75,29.79 10.50,0 10.50,41.74 19.01,34.36 25.50,50.26 35.00,46.37 28.51,30.48"/>
+			</svg>) as unknown as SVGElement,
+			name: 'Selector'
+		};
+	}
+	/* eslint-enable no-magic-numbers */
 
 	public onLeftDown(x: number, y: number, _keys: Keys): void {
 		const el = this.graphEditor.canvasManager.rootStage.getElementUnderPosition(x, y);
@@ -152,5 +167,12 @@ export class Selector extends Tool {
 		if(el !== null && isIActionable(el)) {
 			el.doAction(x, y);
 		}
+	}
+
+	public onToolDeactivated(): void {
+		for(const m of this.mMoving) {
+			m.cancelMove();
+		}
+		this.mMoving = [];
 	}
 }

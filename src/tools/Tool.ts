@@ -1,3 +1,4 @@
+import { Base } from '../utils/Base';
 import { GraphEditor } from '../GraphEditor';
 
 export type Keys = {
@@ -6,11 +7,10 @@ export type Keys = {
 	shift: boolean;
 };
 
-export abstract class Tool {
-	protected readonly graphEditor: GraphEditor;
-
+export abstract class BaseTool extends Base {
+	// eslint-disable-next-line no-useless-constructor
 	public constructor(graphEditor: GraphEditor) {
-		this.graphEditor = graphEditor;
+		super(graphEditor);
 	}
 
 	/* eslint-disable @typescript-eslint/no-empty-function */
@@ -23,5 +23,14 @@ export abstract class Tool {
 	public onMouseLeave(_x: number, _y: number, _keys: Keys): void {}
 	public onDoubleClick(_x: number, _y: number, _keys: Keys): void {}
 	public onRightClick(_x: number, _y: number, _keys: Keys): void {}
+
+	public onToolActivated(): void {}
+	public onToolDeactivated(): void {}
 	/* eslint-enable @typescript-eslint/no-empty-function */
+
+	public deactivate(): void {
+		this.graphEditor.toolManager.deactivateTool();
+	}
+
+	public abstract getToolGUI(): { icon: SVGElement; name: string };
 }

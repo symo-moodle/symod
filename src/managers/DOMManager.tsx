@@ -1,24 +1,28 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as JSXFactory from 'jsx-dom';
+import { Base } from '../utils/Base';
+import { BasePopup } from '../popups/BasePopup';
 import { GraphEditor } from '../GraphEditor';
 import { MouseButtons } from '../utils/MouseButtons';
-import { SettingsWindowPopup } from './popups/SettingsWindowPopup';
-import { TextEditorPopup } from './popups/TextEditorPopup';
 
 export interface IDOMManagerOptions {
 	id: string;
-	width: number;
-	height: number;
-	panelWidth: number;
+	width?: number;
+	height?: number;
+	panelWidth?: number;
 }
 
-export class DOMManager {
+export class DOMManager extends Base {
+	/* eslint-disable no-magic-numbers */
+	private static readonly DEFAULT_WIDTH = 600;
+	private static readonly DEFAULT_HEIGHT = 400;
+	private static readonly DEFAULT_PANEL_WIDTH = 250;
+	/* eslint-enable no-magic-numbers */
+
 	private readonly mId: string;
 	private mWidth: number;
 	private mHeight: number;
 	private readonly mPanelWidth: number;
-
-	private readonly mGraphEditor: GraphEditor;
 
 	private mRootElement!: HTMLElement;
 	private mPanelElement!: HTMLElement;
@@ -26,16 +30,13 @@ export class DOMManager {
 	private mCanvasElement!: HTMLCanvasElement;
 	private mCanvasOverlayElement!: HTMLElement;
 
-	private mTextEditor!: TextEditorPopup;
-	private mSettingsPopup!: SettingsWindowPopup;
-
 	public constructor(graphEditor: GraphEditor, options: IDOMManagerOptions) {
-		this.mGraphEditor = graphEditor;
+		super(graphEditor);
 
 		this.mId = options.id;
-		this.mWidth = options.width;
-		this.mHeight = options.height;
-		this.mPanelWidth = options.panelWidth;
+		this.mWidth = options.width ?? DOMManager.DEFAULT_WIDTH;
+		this.mHeight = options.height ?? DOMManager.DEFAULT_HEIGHT;
+		this.mPanelWidth = options.panelWidth ?? DOMManager.DEFAULT_PANEL_WIDTH;
 
 		this.createDOM();
 	}
@@ -67,6 +68,11 @@ export class DOMManager {
 		}
 	}
 
+	public zoomAdjust(): void {
+		this.mCanvasElement.width = this.mCanvasBoxElement.offsetWidth * this.graphEditor.zoomManager.zoom;
+		this.mCanvasElement.height = this.mCanvasBoxElement.offsetHeight * this.graphEditor.zoomManager.zoom;
+	}
+
 	public resize(width: number, height: number): void {
 		this.mWidth = width;
 		this.mHeight = height;
@@ -76,10 +82,13 @@ export class DOMManager {
 
 		this.mPanelElement.style.width = `${this.mPanelWidth}px`;
 		this.mPanelElement.style.minWidth = `${this.mPanelWidth}px`;
+		this.mPanelElement.style.height = `${this.mHeight}px`;
 
-		this.mCanvasElement.width = this.mCanvasBoxElement.offsetWidth * this.mGraphEditor.zoomManager.zoom;
-		this.mCanvasElement.height = this.mCanvasBoxElement.offsetHeight * this.mGraphEditor.zoomManager.zoom;
-		this.mGraphEditor.canvasManager.resize(this.mCanvasElement.width, this.mCanvasElement.height);
+		this.mCanvasBoxElement.style.width = `${this.mWidth - this.mPanelWidth}px`;
+		this.mCanvasBoxElement.style.height = `${this.mHeight}px`;
+
+		this.zoomAdjust();
+		this.graphEditor.canvasManager.resize(this.mCanvasElement.width, this.mCanvasElement.height);
 	}
 
 	public setCanvasCursor(cursor: string): void {
@@ -91,33 +100,38 @@ export class DOMManager {
 		return this.mCanvasElement.getContext('2d')!;
 	}
 
-	public get textEditor(): TextEditorPopup {
-		return this.mTextEditor;
+	public showPopup(popup: BasePopup): void {
+		this.hidePopup();
+		this.mCanvasOverlayElement.style.visibility = 'visible';
+
+		const dom = popup.getDOM();
+		this.mCanvasOverlayElement.appendChild(dom);
+		dom.focus();
 	}
 
-	public get settingsPopup(): SettingsWindowPopup {
-		return this.mSettingsPopup;
+	public hidePopup(): void {
+		this.mCanvasOverlayElement.style.visibility = 'hidden';
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const parent = this.mCanvasOverlayElement;
+		while(parent.hasChildNodes()) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			parent.removeChild(parent.firstChild!);
+		}
 	}
 
 	private createDOM(): void {
 		this.mRootElement = (
 			<div id={this.mId} class="grapheditor">
-				<table>
-					<tr>
-						{this.mPanelElement = (<td class="panel"></td>)}
-						{this.mCanvasBoxElement = (<td class="canvasbox">
-							<div>
-								{this.mCanvasOverlayElement = (<div class="overlay"></div>)}
-								{this.mCanvasElement = (<canvas></canvas> as HTMLCanvasElement)}
-							</div>
-						</td>)}
-					</tr>
-				</table>
+				{this.mPanelElement = (<div class="panel">
+					{this.graphEditor.toolManager.getDOM()}
+				</div>)}
+				{this.mCanvasBoxElement = (<div class="canvasbox">
+					{this.mCanvasOverlayElement = (<div class="overlay"></div>)}
+					{this.mCanvasElement = (<canvas></canvas> as HTMLCanvasElement)}
+				</div>)}
 			</div>
 		);
-
-		this.mTextEditor = new TextEditorPopup(this.mGraphEditor, this.mCanvasOverlayElement);
-		this.mSettingsPopup = new SettingsWindowPopup(this.mGraphEditor, this.mCanvasOverlayElement);
 
 		this.mCanvasElement.onmousemove = this.onMouseMove.bind(this);
 		this.mCanvasElement.onmousedown = this.onMouseDown.bind(this);
@@ -132,50 +146,44 @@ export class DOMManager {
 
 	private onMouseDown(e: MouseEvent): void {
 		const { x, y } = this.calculateCanvasCoordinates(e);
-		this.mPanelElement.innerText = `mousedown: ${x}x${y}`;
 		if(e.button === MouseButtons.LEFT) {
-			this.mGraphEditor.toolManager.onLeftDown(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+			this.graphEditor.toolManager.onLeftDown(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 		}
 		else if(e.button === MouseButtons.RIGHT) {
-			this.mGraphEditor.toolManager.onRightDown(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+			this.graphEditor.toolManager.onRightDown(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 		}
 	}
 
 	private onMouseUp(e: MouseEvent): void {
 		const { x, y } = this.calculateCanvasCoordinates(e);
-		this.mPanelElement.innerText = `mouseup ${x}x${y}`;
 		if(e.button === MouseButtons.LEFT) {
-			this.mGraphEditor.toolManager.onLeftUp(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+			this.graphEditor.toolManager.onLeftUp(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 		}
 		else if(e.button === MouseButtons.RIGHT) {
-			this.mGraphEditor.toolManager.onRightUp(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+			this.graphEditor.toolManager.onRightUp(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 		}
 	}
 
 	private onMouseMove(e: MouseEvent): void {
 		const { x, y } = this.calculateCanvasCoordinates(e);
-		this.mPanelElement.innerText = `mousemove ${x}x${y}`;
-		this.mGraphEditor.toolManager.onMouseMove(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+		this.graphEditor.toolManager.onMouseMove(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 	}
 
 	private onMouseEnter(e: MouseEvent): void {
 		const { x, y } = this.calculateCanvasCoordinates(e);
-		this.mPanelElement.innerText = `mouseenter ${x}x${y}`;
-		this.mGraphEditor.toolManager.onMouseEnter(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+		this.graphEditor.toolManager.onMouseEnter(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 	}
 
 	private onMouseLeave(e: MouseEvent): void {
 		const { x, y } = this.calculateCanvasCoordinates(e);
-		this.mPanelElement.innerText = `mouseleave ${x}x${y}`;
-		this.mGraphEditor.toolManager.onMouseLeave(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+		this.graphEditor.toolManager.onMouseLeave(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 	}
 
 	private onDoubleClick(e: MouseEvent): void {
 		e.preventDefault();
 		const { x, y } = this.calculateCanvasCoordinates(e);
 		if(e.button === MouseButtons.LEFT) {
-			this.mPanelElement.innerText = `dblclick ${x}x${y}`;
-			this.mGraphEditor.toolManager.onDoubleClick(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
+			this.graphEditor.toolManager.onDoubleClick(x, y, { ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey });
 		}
 	}
 
@@ -185,8 +193,8 @@ export class DOMManager {
 
 	private calculateCanvasCoordinates(e: MouseEvent): { x: number; y: number } {
 		const rect = this.mCanvasElement.getBoundingClientRect();
-		const mouseX = (e.x - rect.left) / this.mGraphEditor.zoomManager.zoom;
-		const mouseY = (e.y - rect.top) / this.mGraphEditor.zoomManager.zoom;
+		const mouseX = (e.x - rect.left) / this.graphEditor.zoomManager.zoom;
+		const mouseY = (e.y - rect.top) / this.graphEditor.zoomManager.zoom;
 		return { x: mouseX, y: mouseY };
 	}
 }

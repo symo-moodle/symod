@@ -1,15 +1,25 @@
-import { Element } from './Element';
+import { BaseElement } from './BaseElement';
 import { GraphEditor } from '../GraphEditor';
 
-export class Stage extends Element {
+export class Stage extends BaseElement {
+	private readonly mStageGraphEditor: GraphEditor;
 	private mWidth: number;
 	private mHeight: number;
 
-	private readonly mOwner: Element | GraphEditor;
-	private readonly mElements: Element[];
+	private readonly mOwner: BaseElement | GraphEditor;
+	private readonly mElements: BaseElement[];
 
-	public constructor(parent: Element | GraphEditor, options?: { width: number; height: number }) {
-		super(parent instanceof Element ? parent.parent : null);
+	public constructor(parent: BaseElement | GraphEditor, options?: { width: number; height: number }) {
+		if(parent instanceof BaseElement) {
+			if(parent.parent === null) throw new Error('parent can only be null for the root stage');
+			super(parent.parent.graphEditor);
+			this.mStageGraphEditor = parent.parent.graphEditor;
+		}
+		else {
+			super(parent);
+			this.mStageGraphEditor = parent;
+		}
+
 		this.mWidth = options?.width ?? 0;
 		this.mHeight = options?.height ?? 0;
 		this.mOwner = parent;
@@ -35,22 +45,20 @@ export class Stage extends Element {
 	}
 
 	public invalidate(): void {
-		if(this.mOwner instanceof Element) super.invalidate();
+		if(this.mOwner instanceof BaseElement) super.invalidate();
 		else this.mOwner.canvasManager.invalidate();
 	}
 
-	public get canvas(): GraphEditor {
-		if(this.mOwner instanceof GraphEditor) return this.mOwner;
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		else return this.mOwner.parent!.canvas;
+	public get graphEditor(): GraphEditor {
+		return this.mStageGraphEditor;
 	}
 
-	public addElement(element: Element): void {
+	public addElement(element: BaseElement): void {
 		this.mElements.push(element);
 		this.invalidate();
 	}
 
-	public getElementUnderPosition(x: number, y: number): Element | null {
+	public getElementUnderPosition(x: number, y: number): BaseElement | null {
 		for(const element of [...this.mElements].reverse()) {
 			const el = element.getElementUnderPosition(x, y);
 			if(el !== null) {

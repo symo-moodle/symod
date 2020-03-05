@@ -1,29 +1,22 @@
 .grapheditor {
-    background-color: #eeeeee;
+	background-color: #eeeeee;
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+	align-items: flex-start;
+	flex-wrap: nowrap;
 }
 
-.grapheditor table {
-    width: 100%;
-    height: 100%;
-}
-
-.grapheditor td {
-    vertical-align: top;
+.grapheditor > div {
     overflow: auto;
 }
 
-.grapheditor td > div {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-}
-
-.grapheditor td.panel {
+.grapheditor .panel {
     background-color: #dddddd;
     min-height: 100%;
 }
 
-.grapheditor .canvasbox > div {
+.grapheditor .canvasbox {
     position: relative;
 }
 
@@ -145,4 +138,56 @@
 .grapheditor .canvasbox .window .main .group label input[type=radio] {
     margin-left: 10px;
     flex-grow: 0;
+}
+
+.grapheditor .toolpanel .toolgroup {
+}
+
+.grapheditor .toolpanel .toolgroup .tool {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	width: 75px;
+	height: 100px;
+	padding: 12px;
+	position: relative;
+	cursor: pointer;
+	box-sizing: border-box;
+	margin: 0 10px;
+}
+
+.grapheditor .toolpanel .toolgroup .tool svg {
+	width: 50px;
+	height: 50px;
+}
+
+.grapheditor .toolpanel .toolgroup .tool .label {
+	text-align: center;
+}
+
+.grapheditor .toolpanel .toolgroup .tool input {
+	position: absolute;
+	visibility: hidden;
+	cursor: pointer;
+}
+
+.grapheditor .toolpanel .toolgroup .tool .selector {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 75px;
+	height: 100px;
+	border-radius: 5px;
+	border: 1px solid black;
+	cursor: pointer;
+	transition: all linear 0.1s;
+}
+
+.grapheditor .toolpanel .toolgroup .tool input:checked ~ .selector {
+	box-shadow: inset 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+
+.grapheditor .toolpanel .toolgroup .tool:hover .selector {
+	box-shadow: inset 0px 0px 4px 0px rgba(0,0,0,0.75);
 }

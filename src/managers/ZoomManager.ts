@@ -1,24 +1,32 @@
+import { Base } from '../utils/Base';
 import { GraphEditor } from '../GraphEditor';
 
 export interface IZoomManagerOptions {
 	zoom?: number;
 }
 
-export class ZoomManager {
-	private readonly mGraphEditor: GraphEditor;
+export class ZoomManager extends Base {
 	private mZoom: number;
 
 	public constructor(graphEditor: GraphEditor, options?: IZoomManagerOptions) {
-		this.mGraphEditor = graphEditor;
+		super(graphEditor);
 
 		this.mZoom = options?.zoom ?? 1;
 	}
 
 	public get zoom(): number {
-		return this.mZoom;
+		return this.mZoom >= 1 ? this.mZoom : -(1 / (this.mZoom - 2));
 	}
 
-	public set zoom(value: number) {
-		this.mZoom = value;
+	public zoomIn(): void {
+		this.mZoom += 1;
+		this.graphEditor.canvasManager.invalidate();
+		this.graphEditor.domManager.zoomAdjust();
+	}
+
+	public zoomOut(): void {
+		this.mZoom -= 1;
+		this.graphEditor.canvasManager.invalidate();
+		this.graphEditor.domManager.zoomAdjust();
 	}
 }

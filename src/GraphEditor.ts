@@ -1,5 +1,7 @@
 export * from './elements/BasicShapes';
 export * from './elements/Label';
+export * from './tools/Selector';
+export * from './tools/Zoom';
 
 import { CanvasManager, ICanvasManagerOptions } from './managers/CanvasManager';
 import { DOMManager, IDOMManagerOptions } from './managers/DOMManager';
@@ -14,33 +16,21 @@ type GraphEditorOptions = IDOMManagerOptions &
 	IZoomManagerOptions;
 
 export class GraphEditor {
-	/* eslint-disable no-magic-numbers */
-	private static readonly DEFAULT_WIDTH = 600;
-	private static readonly DEFAULT_HEIGHT = 400;
-	private static readonly DEFAULT_PANEL_WIDTH = 250;
-	/* eslint-enable no-magic-numbers */
-
 	private readonly mDomManager: DOMManager;
 	private readonly mCanvasManager: CanvasManager;
 	private readonly mToolManager: ToolManager;
 	private readonly mSelectionManager: SelectionManager;
 	private readonly mZoomManager: ZoomManager;
 
-	public constructor(id: string, options?: GraphEditorOptions) {
-		this.mDomManager = new DOMManager(this, {
-			id: id,
-			width: options?.width ?? GraphEditor.DEFAULT_WIDTH,
-			height: options?.height ?? GraphEditor.DEFAULT_HEIGHT,
-			panelWidth: options?.panelWidth ?? GraphEditor.DEFAULT_PANEL_WIDTH
-		});
+	public constructor(config: (graphEditod: GraphEditor) => GraphEditorOptions) {
+		const options = config(this);
 
-		this.mCanvasManager = new CanvasManager(this, {});
+		this.mCanvasManager = new CanvasManager(this, options);
+		this.mToolManager = new ToolManager(this, options);
+		this.mSelectionManager = new SelectionManager(this, options);
+		this.mZoomManager = new ZoomManager(this, options);
 
-		this.mToolManager = new ToolManager(this, {});
-
-		this.mSelectionManager = new SelectionManager(this, {});
-
-		this.mZoomManager = new ZoomManager(this, { zoom: options?.zoom ?? 1 });
+		this.mDomManager = new DOMManager(this, options);
 
 		this.canvasManager.startCanvas();
 	}

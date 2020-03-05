@@ -1,10 +1,10 @@
-import { BoundingBox, Element } from './Element';
+import { BaseElement, BoundingBox } from './BaseElement';
 import { ControlBox, IControlBoxHost } from './ControlBox';
 import { IMovable, ISelectable } from '../tools/Selector';
 import { Cursor } from '../utils/Cursor';
 import { Stage } from './Stage';
 
-export abstract class Node extends Element implements ISelectable, IMovable, IControlBoxHost {
+export abstract class BaseNode extends BaseElement implements ISelectable, IMovable, IControlBoxHost {
 	private mBox: BoundingBox;
 	private readonly mControlBox: ControlBox;
 
@@ -26,7 +26,7 @@ export abstract class Node extends Element implements ISelectable, IMovable, ICo
 		this.mTempBox = { ...this.mBox };
 	}
 
-	public getElementUnderPosition(mx: number, my: number): Element | null {
+	public getElementUnderPosition(mx: number, my: number): BaseElement | null {
 		const { x, y, width, height } = this.boundingBox;
 		if(this.isSelected) {
 			const controlBoxSelection = this.mControlBox.getElementUnderPosition(mx, my);
@@ -47,11 +47,11 @@ export abstract class Node extends Element implements ISelectable, IMovable, ICo
 	}
 
 	public get isSelected(): boolean {
-		return this.parent?.canvas.selectionManager.isSelected(this) ?? false;
+		return this.parent?.graphEditor.selectionManager.isSelected(this) ?? false;
 	}
 
 	public get isFocused(): boolean {
-		return this.parent?.canvas.selectionManager.isFocused(this) ?? false;
+		return this.parent?.graphEditor.selectionManager.isFocused(this) ?? false;
 	}
 
 	public get cursor(): Cursor {

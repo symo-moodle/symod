@@ -1,12 +1,11 @@
+import { Base } from '../utils/Base';
 import { GraphEditor } from '../GraphEditor';
 import { Stage } from '../elements/Stage';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ICanvasManagerOptions {}
 
-export class CanvasManager {
-	private readonly mGraphEditor: GraphEditor;
-
+export class CanvasManager extends Base {
 	private mWidth: number;
 	private mHeight: number;
 
@@ -15,11 +14,11 @@ export class CanvasManager {
 	private mRedrawNeeded: boolean;
 
 	public constructor(graphEditor: GraphEditor, _options?: ICanvasManagerOptions) {
-		this.mGraphEditor = graphEditor;
+		super(graphEditor);
 
 		this.mWidth = 0;
 		this.mHeight = 0;
-		this.mRootStage = new Stage(this.mGraphEditor);
+		this.mRootStage = new Stage(this.graphEditor);
 		this.mAnimationFrameHandle = null;
 		this.mRedrawNeeded = true;
 	}
@@ -49,8 +48,8 @@ export class CanvasManager {
 
 	private draw(): void {
 		if(this.mRedrawNeeded) {
-			const c = this.mGraphEditor.domManager.canvasContext;
-			const { zoom } = this.mGraphEditor.zoomManager;
+			const c = this.graphEditor.domManager.canvasContext;
+			const { zoom } = this.graphEditor.zoomManager;
 
 			c.clearRect(0, 0, this.mWidth, this.mHeight);
 			c.save();

@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 
 import { ILabelHost, Label } from './Label';
-import { BoundingBox } from './Element';
+import { BaseNode } from './Node';
+import { BoundingBox } from './BaseElement';
 import { ControlPoint } from './ControlPoint';
-import { Node } from './Node';
 import { Stage } from './Stage';
 
 export interface IBasicShapeOptions {
@@ -28,7 +28,7 @@ export interface IBasicShapeOptions {
 	shadowOffsetY?: number;
 }
 
-export abstract class BasicShape extends Node {
+export abstract class BaseBasicShape extends BaseNode {
 	private readonly mFillStyle:
 		| string
 		| {
@@ -133,7 +133,7 @@ export interface IRectOptions {
 	height: number;
 }
 
-export class Rect extends BasicShape implements ILabelHost {
+export class Rect extends BaseBasicShape implements ILabelHost {
 	private mX: number;
 	private mY: number;
 	private mWidth: number;
